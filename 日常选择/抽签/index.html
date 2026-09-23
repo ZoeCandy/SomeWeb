@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>今日好事 · 抽签器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            background: #fef9f3;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 1.2rem 1rem;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255, 215, 150, 0.15) 0%, transparent 30%),
+                              radial-gradient(circle at 90% 70%, rgba(150, 200, 255, 0.15) 0%, transparent 35%);
+            padding-bottom: max(1.2rem, env(safe-area-inset-bottom));
+            padding-left: max(1rem, env(safe-area-inset-left));
+            padding-right: max(1rem, env(safe-area-inset-right));
+            padding-top: max(1.2rem, env(safe-area-inset-top));
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .app-container {
+            max-width: 800px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 36px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.18);
+            padding: 2rem 2rem 3rem;
+            position: relative;
+            transition: all 0.2s;
+            border: 1px solid #fff3e0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 0.8rem 1rem;
+        }
+
+        .title-section h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f39c12, #e67e22, #d35400);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            line-height: 1.2;
+            flex-wrap: wrap;
+        }
+
+        .title-section .date {
+            font-size: 1rem;
+            color: #a0522d;
+            margin-top: 0.35rem;
+            font-weight: 600;
+            background: #fff3e0;
+            display: inline-block;
+            padding: 0.25rem 1.2rem;
+            border-radius: 40px;
+            box-shadow: 0 2px 6px rgba(243, 156, 18, 0.1);
+            line-height: 1.4;
+        }
+
+        .settings-btn {
+            background: #ffffff;
+            border: 1.5px solid #ffe0b2;
+            color: #e67e22;
+            font-size: 1.5rem;
+            line-height: 1;
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(230, 126, 34, 0.1);
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .settings-btn:hover {
+            background: #f39c12;
+            color: white;
+            border-color: #f39c12;
+            transform: rotate(60deg) scale(1.05);
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.4);
+        }
+
+        .settings-btn:active {
+            transform: rotate(60deg) scale(0.95);
+        }
+
+        .result-area {
+            background: #fffaf3;
+            border-radius: 28px;
+            padding: 1.6rem 1.5rem 1rem;
+            margin-bottom: 1.8rem;
+            border: 2px dashed #ffe0b2;
+            min-height: 160px;
+            transition: all 0.3s;
+            box-shadow: inset 0 2px 8px rgba(255, 215, 150, 0.1);
+        }
+
+        .result-date {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #b85e00;
+            letter-spacing: 0.3px;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px dashed #ffd699;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .result-date span {
+            background: #f39c12;
+            color: white;
+            padding: 0.2rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(243, 156, 18, 0.3);
+            white-space: nowrap;
+        }
+
+        .plan-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .plan-item {
+            background: white;
+            padding: 1rem 1.2rem;
+            border-radius: 20px;
+            box-shadow: 0 6px 14px -4px rgba(243, 156, 18, 0.12);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #5d3a1a;
+            border-left: 8px solid #f39c12;
+            animation: slideIn 0.35s ease;
+            transition: transform 0.2s;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .plan-item:hover {
+            transform: translateX(5px);
+        }
+
+        .plan-item::before {
+            content: "🌟";
+            font-size: 1.3rem;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+            flex-shrink: 0;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .empty-message {
+            color: #b8956e;
+            text-align: center;
+            padding: 1.8rem 0;
+            font-style: italic;
+            font-size: 1.05rem;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        .draw-button-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.8rem;
+        }
+
+        .draw-btn {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 700;
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 14px 30px -8px rgba(230, 126, 34, 0.5);
+            transition: 0.25s;
+            letter-spacing: 0.8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            min-height: 56px;
+        }
+
+        .draw-btn:hover {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            transform: scale(1.03) translateY(-2px);
+            box-shadow: 0 20px 40px -8px #e67e22;
+        }
+
+        .draw-btn:active {
+            transform: scale(0.97);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(93, 58, 26, 0.3);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 1rem;
+            padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-panel {
+            background: #ffffff;
+            max-width: 680px;
+            width: 100%;
+            max-height: 88vh;
+            max-height: 88dvh;
+            border-radius: 32px;
+            padding: 2rem 2rem 2rem;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.4);
+            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid #ffe0b2;
+        }
+
+        @keyframes modalPop {
+            from {
+                opacity: 0;
+                transform: scale(0.92) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            background: white;
+            padding-top: 0.2rem;
+            padding-bottom: 0.8rem;
+            z-index: 2;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.3;
+        }
+
+        .close-modal {
+            background: #fff3e0;
+            border: none;
+            font-size: 1.8rem;
+            line-height: 1;
+            color: #e67e22;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 400;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .close-modal:hover {
+            background: #f39c12;
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .close-modal:active {
+            transform: rotate(90deg) scale(0.9);
+        }
+
+        .setting-row {
+            margin-bottom: 1.5rem;
+        }
+
+        .setting-row label {
+            font-weight: 700;
+            color: #b85e00;
+            display: block;
+            margin-bottom: 0.6rem;
+            font-size: 1.05rem;
+        }
+
+        .setting-row input[type="number"] {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            font-size: 1.05rem;
+            border: 2px solid #ffe0b2;
+            border-radius: 18px;
+            background: #fffaf3;
+            outline: none;
+            transition: 0.2s;
+            font-weight: 600;
+            color: #5d3a1a;
+            min-height: 54px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .setting-row input[type="number"]:focus {
+            border-color: #f39c12;
+            box-shadow: 0 0 0 4px rgba(243, 156, 18, 0.15);
+            background: white;
+        }
+
+        .combo-group {
+            background: #fffaf3;
+            border-radius: 24px;
+            padding: 1.2rem 1.2rem 0.8rem;
+            margin-bottom: 1.2rem;
+            border: 1.5px solid #ffe8cc;
+            transition: all 0.2s;
+        }
+
+        .combo-group:hover {
+            border-color: #ffd699;
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.08);
+        }
+
+        .combo-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 2px solid #ffe8cc;
+        }
+
+        .combo-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #b85e00;
+            background: #ffedd9;
+            padding: 0.3rem 1.2rem;
+            border-radius: 40px;
+            display: inline-block;
+            box-shadow: 0 2px 6px rgba(243, 156, 18, 0.1);
+            line-height: 1.4;
+        }
+
+        .option-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.4rem 0.2rem;
+            flex-wrap: wrap;
+            row-gap: 0.5rem;
+        }
+
+        .option-item input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            min-width: 22px;
+            accent-color: #f39c12;
+            cursor: pointer;
+            flex-shrink: 0;
+            border-radius: 6px;
+            touch-action: manipulation;
+        }
+
+        .option-name {
+            flex: 2 1 160px;
+            font-weight: 600;
+            color: #5d3a1a;
+            font-size: 0.98rem;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+
+        .option-ratio {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 0 0 auto;
+            background: white;
+            border: 1.5px solid #ffe0b2;
+            border-radius: 40px;
+            padding: 0.15rem 0.15rem 0.15rem 0.9rem;
+            transition: 0.2s;
+        }
+
+        .option-ratio:focus-within {
+            border-color: #f39c12;
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.1);
+        }
+
+        .option-ratio label {
+            font-size: 0.8rem;
+            color: #b8956e;
+            font-weight: 600;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .option-ratio input {
+            width: 68px;
+            padding: 0.45rem 0.3rem;
+            border: none;
+            background: transparent;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #e67e22;
+            text-align: center;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            min-height: 40px;
+        }
+
+        .option-ratio input:focus {
+            background: #fff3e0;
+            border-radius: 40px;
+        }
+
+        .info-tip {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #b8956e;
+            margin-top: 1.5rem;
+            padding-top: 1.2rem;
+            border-top: 2px dashed #ffe0b2;
+            line-height: 1.7;
+            font-weight: 500;
+        }
+
+        /* 小飘带效果 - 桌面显示，移动端隐藏避免遮挡 */
+        .app-container::before {
+            content: "🎈";
+            position: absolute;
+            top: -12px;
+            left: 30px;
+            font-size: 2rem;
+            opacity: 0.6;
+            transform: rotate(-15deg);
+        }
+
+        .app-container::after {
+            content: "☀️";
+            position: absolute;
+            top: -10px;
+            right: 40px;
+            font-size: 2rem;
+            opacity: 0.6;
+            transform: rotate(10deg);
+        }
+
+        /* ============================================================
+           响应式适配 - 平板 (≤ 768px)
+           ============================================================ */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.9rem;
+                align-items: flex-start;
+            }
+
+            .app-container {
+                border-radius: 28px;
+                padding: 1.6rem 1.4rem 2.4rem;
+            }
+
+            .title-section h1 {
+                font-size: 1.7rem;
+            }
+
+            .title-section .date {
+                font-size: 0.92rem;
+                padding: 0.2rem 1rem;
+            }
+
+            .settings-btn {
+                width: 46px;
+                height: 46px;
+                min-width: 46px;
+                font-size: 1.35rem;
+            }
+
+            .result-area {
+                border-radius: 24px;
+                padding: 1.4rem 1.2rem 0.9rem;
+            }
+
+            .plan-item {
+                padding: 0.9rem 1rem;
+                font-size: 1rem;
+                border-left-width: 7px;
+            }
+
+            .draw-btn {
+                font-size: 1.2rem;
+                padding: 0.9rem 2.4rem;
+                width: 100%;
+                max-width: 360px;
+            }
+
+            .modal-panel {
+                border-radius: 28px;
+                padding: 1.6rem 1.4rem 1.6rem;
+                max-height: 90vh;
+                max-height: 90dvh;
+            }
+
+            .modal-header h2 {
+                font-size: 1.35rem;
+            }
+
+            .combo-group {
+                border-radius: 20px;
+                padding: 1rem 1rem 0.7rem;
+            }
+
+            .combo-header h3 {
+                font-size: 1rem;
+                padding: 0.25rem 1rem;
+            }
+
+            .option-name {
+                font-size: 0.94rem;
+                flex: 2 1 140px;
+            }
+
+            .option-ratio input {
+                width: 60px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* ============================================================
+           响应式适配 - 手机 (≤ 480px)
+           ============================================================ */
+        @media (max-width: 480px) {
+            body {
+                padding: 0.7rem 0.6rem;
+                background-image: none;
+            }
+
+            .app-container {
+                border-radius: 24px;
+                padding: 1.2rem 1rem 2rem;
+            }
+
+            .app-container::before,
+            .app-container::after {
+                display: none;
+            }
+
+            .header {
+                margin-bottom: 1.4rem;
+                gap: 0.6rem;
+            }
+
+            .title-section h1 {
+                font-size: 1.45rem;
+                gap: 6px;
+            }
+
+            .title-section .date {
+                font-size: 0.85rem;
+                padding: 0.2rem 0.9rem;
+                margin-top: 0.3rem;
+            }
+
+            .settings-btn {
+                width: 42px;
+                height: 42px;
+                min-width: 42px;
+                font-size: 1.25rem;
+            }
+
+            .result-area {
+                border-radius: 20px;
+                padding: 1.1rem 1rem 0.8rem;
+                margin-bottom: 1.4rem;
+            }
+
+            .result-date {
+                font-size: 0.92rem;
+                gap: 6px;
+                margin-bottom: 1rem;
+                padding-bottom: 0.6rem;
+            }
+
+            .result-date span {
+                font-size: 0.72rem;
+                padding: 0.15rem 0.7rem;
+            }
+
+            .plan-list {
+                gap: 0.7rem;
+            }
+
+            .plan-item {
+                padding: 0.8rem 0.9rem;
+                font-size: 0.95rem;
+                border-left-width: 6px;
+                border-radius: 16px;
+                gap: 10px;
+            }
+
+            .plan-item::before {
+                font-size: 1.1rem;
+            }
+
+            .empty-message {
+                font-size: 0.95rem;
+                padding: 1.4rem 0;
+            }
+
+            .draw-button-wrapper {
+                margin-bottom: 1.2rem;
+            }
+
+            .draw-btn {
+                font-size: 1.1rem;
+                padding: 0.85rem 1.8rem;
+                border-radius: 50px;
+                width: 100%;
+                max-width: 100%;
+                min-height: 52px;
+            }
+
+            .modal-overlay {
+                padding: 0.6rem;
+                align-items: flex-end;
+            }
+
+            .modal-panel {
+                border-radius: 24px 24px 16px 16px;
+                padding: 1.2rem 1rem 1.4rem;
+                max-height: 92vh;
+                max-height: 92dvh;
+                width: 100%;
+            }
+
+            .modal-header {
+                margin-bottom: 1.2rem;
+                padding-bottom: 0.6rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .close-modal {
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+                font-size: 1.6rem;
+            }
+
+            .setting-row {
+                margin-bottom: 1.2rem;
+            }
+
+            .setting-row label {
+                font-size: 0.98rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .setting-row input[type="number"] {
+                font-size: 1rem;
+                padding: 0.8rem 1rem;
+                min-height: 50px;
+                border-radius: 16px;
+            }
+
+            .combo-group {
+                border-radius: 18px;
+                padding: 0.9rem 0.9rem 0.6rem;
+                margin-bottom: 1rem;
+            }
+
+            .combo-header {
+                margin-bottom: 0.8rem;
+                padding-bottom: 0.5rem;
+            }
+
+            .combo-header h3 {
+                font-size: 0.95rem;
+                padding: 0.2rem 0.9rem;
+            }
+
+            .option-list {
+                gap: 0.6rem;
+            }
+
+            .option-item {
+                gap: 8px;
+                padding: 0.3rem 0;
+            }
+
+            .option-item input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+                min-width: 20px;
+            }
+
+            .option-name {
+                font-size: 0.9rem;
+                flex: 1 1 100%;
+                order: 2;
+                padding-left: 28px;
+                margin-top: -4px;
+            }
+
+            .option-ratio {
+                order: 3;
+                margin-left: auto;
+                padding: 0.1rem 0.1rem 0.1rem 0.8rem;
+            }
+
+            .option-ratio label {
+                font-size: 0.75rem;
+            }
+
+            .option-ratio input {
+                width: 55px;
+                font-size: 0.88rem;
+                padding: 0.4rem 0.2rem;
+                min-height: 36px;
+            }
+
+            .info-tip {
+                font-size: 0.78rem;
+                margin-top: 1.2rem;
+                padding-top: 1rem;
+                line-height: 1.65;
+            }
+        }
+
+        /* ============================================================
+           超小屏适配 (≤ 360px)
+           ============================================================ */
+        @media (max-width: 360px) {
+            .title-section h1 {
+                font-size: 1.3rem;
+            }
+
+            .title-section .date {
+                font-size: 0.78rem;
+            }
+
+            .settings-btn {
+                width: 38px;
+                height: 38px;
+                min-width: 38px;
+                font-size: 1.15rem;
+            }
+
+            .plan-item {
+                font-size: 0.88rem;
+                padding: 0.7rem 0.8rem;
+            }
+
+            .draw-btn {
+                font-size: 1rem;
+                padding: 0.8rem 1.2rem;
+            }
+
+            .modal-panel {
+                padding: 1rem 0.8rem 1.2rem;
+            }
+
+            .option-ratio input {
+                width: 48px;
+                font-size: 0.82rem;
+            }
+        }
+
+        /* ============================================================
+           横屏模式优化 (高度较小)
+           ============================================================ */
+        @media (max-height: 500px) and (orientation: landscape) {
+            body {
+                padding: 0.5rem;
+                align-items: flex-start;
+            }
+
+            .app-container {
+                border-radius: 20px;
+                padding: 0.9rem 1rem 1.2rem;
+            }
+
+            .header {
+                margin-bottom: 0.8rem;
+            }
+
+            .title-section h1 {
+                font-size: 1.3rem;
+            }
+
+            .result-area {
+                min-height: 100px;
+                padding: 0.9rem 1rem 0.6rem;
+                margin-bottom: 0.9rem;
+            }
+
+            .plan-list {
+                gap: 0.5rem;
+            }
+
+            .plan-item {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .draw-btn {
+                padding: 0.7rem 1.8rem;
+                font-size: 1rem;
+                min-height: 46px;
+            }
+
+            .modal-panel {
+                max-height: 94vh;
+                max-height: 94dvh;
+                padding: 1rem 1.2rem 1rem;
+            }
+
+            .modal-header {
+                margin-bottom: 0.8rem;
+                padding-bottom: 0.5rem;
+            }
+
+            .combo-group {
+                padding: 0.8rem 0.8rem 0.5rem;
+                margin-bottom: 0.8rem;
+            }
+        }
+
+        /* 确保触摸设备上的可点击区域足够大 */
+        @media (hover: none) and (pointer: coarse) {
+            .settings-btn,
+            .draw-btn,
+            .close-modal {
+                cursor: default;
+            }
+
+            .plan-item:hover {
+                transform: none;
+            }
+
+            .settings-btn:hover {
+                transform: none;
+                background: #ffffff;
+                color: #e67e22;
+                border-color: #ffe0b2;
+            }
+
+            .draw-btn:hover {
+                transform: none;
+                background: linear-gradient(135deg, #f39c12, #e67e22);
+            }
+
+            .close-modal:hover {
+                transform: none;
+                background: #fff3e0;
+                color: #e67e22;
+            }
+
+            .combo-group:hover {
+                border-color: #ffe8cc;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="title-section">
+                <h1>🎲 今日好事抽签</h1>
+                <div class="date" id="currentDateDisplay"></div>
+            </div>
+            <button class="settings-btn" id="openSettingsBtn" title="点我调教抽签规则">⚙️</button>
+        </div>
+
+        <div class="result-area">
+            <div class="result-date">
+                <span>📅 今天是个好日子</span> <span id="resultDateText"></span>
+            </div>
+            <ul class="plan-list" id="planList">
+                <li class="empty-message">👆 点一下下面的按钮，看看今天有什么好事发生～</li>
+            </ul>
+        </div>
+
+        <div class="draw-button-wrapper">
+            <button class="draw-btn" id="drawBtn">🎰 摇一摇，好事来！</button>
+        </div>
+
+        <div class="modal-overlay" id="settingsModal">
+            <div class="modal-panel">
+                <div class="modal-header">
+                    <h2>⚙️ 好事调参面板</h2>
+                    <button class="close-modal" id="closeSettingsBtn">×</button>
+                </div>
+                <div class="setting-row">
+                    <label for="drawCountInput">📌 今天想抽几件好事？</label>
+                    <input type="number" id="drawCountInput" min="1" value="2" step="1" inputmode="numeric">
+                </div>
+
+                <div id="comboConfigContainer"></div>
+
+                <div class="info-tip">
+                    每个好事都能单独设置比例（默认1），比例越高越容易被抽中。<br>
+                    每个类别最多抽一件好事，抽签总数会自动匹配类别数量。<br>
+                    <span style="color:#e67e22;">✨ 调高比例，让快乐翻倍！</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // 1. 定义类别与好事选项 (幽默风趣 + 积极向上)
+        // ============================================================
+        const COMBINATIONS = [
+            {
+                name: '好好学习，天天向上',
+                options: [
+                    { id: 'work-1', label: '学习半小时excel函数（最好将学习笔记发个小红薯）', ratio: 1, enabled: true },
+                    { id: 'work-2', label: '学习半小时VBA或者简单python吧（最好将学习笔记发个小红薯）', ratio: 1, enabled: true },
+                    { id: 'work-3', label: '学习半小时英语吧（单词或者口语都可以的）', ratio: 1, enabled: true },
+                    { id: 'work-4', label: '学习半小时会计相关知识吧，持续提升自己', ratio: 1, enabled: true },
+					{ id: 'work-5', label: '去招聘软件看看，学半小时公司要求会但是你不会的新技能吧', ratio: 1, enabled: true },
+					{ id: 'work-6', label: '练习半小时计算机二级吧（PPT、EXCEL、WORD工作还是要经常用的）', ratio: 1, enabled: true },
+                ]
+            },
+            {
+                name: '生命在于运动',
+                options: [
+                    { id: 'study-1', label: '骑单车15分钟哦', ratio: 1, enabled: true },
+                    { id: 'study-2', label: '做一套八段锦或者太极拳', ratio: 1, enabled: true },
+                    { id: 'study-3', label: '仰卧起坐50个（坚持锻炼，超越自我）', ratio: 1, enabled: true },
+                ]
+            },
+            {
+                name: '做点好玩的事情',
+                options: [
+                    { id: 'sport-1', label: '听半小时喜马拉雅（历史、新闻或者其他的），放松眼睛和心情，去静静的享受', ratio: 1, enabled: true },
+                    { id: 'sport-2', label: '试试缝纫、插花、非遗等手艺，或者看看相关的视频（半小时）', ratio: 1, enabled: true },
+                    { id: 'sport-3', label: '看半小时做生意、法律、财政的视频试试', ratio: 1, enabled: true },
+					{ id: 'sport-4', label: '做半小时自己喜欢的事吧（不包括看手机哦）', ratio: 1, enabled: true },
+				]
+            }
+        ];
+
+        // ============================================================
+        // 2. 状态管理
+        // ============================================================
+        let comboState = JSON.parse(JSON.stringify(COMBINATIONS));
+
+        // ============================================================
+        // 3. DOM 元素
+        // ============================================================
+        const currentDateDisplay = document.getElementById('currentDateDisplay');
+        const resultDateText = document.getElementById('resultDateText');
+        const planList = document.getElementById('planList');
+        const drawBtn = document.getElementById('drawBtn');
+        const openSettingsBtn = document.getElementById('openSettingsBtn');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const settingsModal = document.getElementById('settingsModal');
+        const drawCountInput = document.getElementById('drawCountInput');
+        const comboConfigContainer = document.getElementById('comboConfigContainer');
+
+        // ============================================================
+        // 4. 工具函数
+        // ============================================================
+        function formatDate(date = new Date()) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}年${m}月${d}日`;
+        }
+
+        function updateDateDisplay() {
+            const today = formatDate();
+            currentDateDisplay.textContent = today;
+            resultDateText.textContent = today;
+        }
+
+        function renderSettingsPanel() {
+            let html = '';
+            comboState.forEach((combo, comboIndex) => {
+                html += `<div class="combo-group" data-combo-index="${comboIndex}">`;
+                html += `<div class="combo-header"><h3>${combo.name}</h3></div>`;
+                html += `<div class="option-list">`;
+                combo.options.forEach((opt, optIndex) => {
+                    const checked = opt.enabled ? 'checked' : '';
+                    html += `
+                        <div class="option-item" data-option-index="${optIndex}">
+                            <input type="checkbox" class="opt-checkbox" data-combo="${comboIndex}" data-opt="${optIndex}" ${checked}>
+                            <span class="option-name">${opt.label}</span>
+                            <div class="option-ratio">
+                                <label>比例</label>
+                                <input type="number" class="opt-ratio-input" data-combo="${comboIndex}" data-opt="${optIndex}" min="0.1" step="0.1" value="${opt.ratio}" inputmode="decimal">
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+            });
+            comboConfigContainer.innerHTML = html;
+
+            document.querySelectorAll('.opt-checkbox').forEach(cb => {
+                cb.addEventListener('change', (e) => {
+                    const comboIdx = parseInt(e.target.dataset.combo);
+                    const optIdx = parseInt(e.target.dataset.opt);
+                    comboState[comboIdx].options[optIdx].enabled = e.target.checked;
+                });
+            });
+
+            document.querySelectorAll('.opt-ratio-input').forEach(inp => {
+                inp.addEventListener('change', (e) => {
+                    const comboIdx = parseInt(e.target.dataset.combo);
+                    const optIdx = parseInt(e.target.dataset.opt);
+                    let val = parseFloat(e.target.value);
+                    if (isNaN(val) || val <= 0) {
+                        val = 1;
+                        e.target.value = 1;
+                    }
+                    comboState[comboIdx].options[optIdx].ratio = val;
+                });
+            });
+        }
+
+        function openSettings() {
+            renderSettingsPanel();
+            settingsModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSettings() {
+            document.querySelectorAll('.opt-checkbox').forEach(cb => {
+                const comboIdx = parseInt(cb.dataset.combo);
+                const optIdx = parseInt(cb.dataset.opt);
+                comboState[comboIdx].options[optIdx].enabled = cb.checked;
+            });
+            document.querySelectorAll('.opt-ratio-input').forEach(inp => {
+                const comboIdx = parseInt(inp.dataset.combo);
+                const optIdx = parseInt(inp.dataset.opt);
+                let val = parseFloat(inp.value);
+                if (isNaN(val) || val <= 0) val = 1;
+                comboState[comboIdx].options[optIdx].ratio = val;
+            });
+            settingsModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ============================================================
+        // 5. 核心抽签逻辑
+        // ============================================================
+        function drawPlans() {
+            let drawCount = parseInt(drawCountInput.value);
+            if (isNaN(drawCount) || drawCount < 1) drawCount = 1;
+
+            const validCombos = [];
+            comboState.forEach((combo, idx) => {
+                const validOptions = combo.options.filter(opt => opt.enabled && opt.ratio > 0);
+                if (validOptions.length > 0) {
+                    validCombos.push({
+                        comboIndex: idx,
+                        comboName: combo.name,
+                        validOptions: validOptions
+                    });
+                }
+            });
+
+            if (validCombos.length === 0) {
+                planList.innerHTML = '<li class="empty-message">😅 一个选项都没开，这是要抽空气吗？去设置里点几个吧～</li>';
+                return;
+            }
+
+            const actualDrawCount = Math.min(drawCount, validCombos.length);
+
+            const shuffledCombos = [...validCombos];
+            for (let i = shuffledCombos.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledCombos[i], shuffledCombos[j]] = [shuffledCombos[j], shuffledCombos[i]];
+            }
+            const selectedCombos = shuffledCombos.slice(0, actualDrawCount);
+
+            const drawnPlans = [];
+            selectedCombos.forEach(combo => {
+                const options = combo.validOptions;
+                const totalRatio = options.reduce((sum, opt) => sum + opt.ratio, 0);
+                let random = Math.random() * totalRatio;
+                let selectedOption = options[0];
+                for (let opt of options) {
+                    if (random < opt.ratio) {
+                        selectedOption = opt;
+                        break;
+                    }
+                    random -= opt.ratio;
+                }
+                drawnPlans.push({
+                    comboName: combo.comboName,
+                    planLabel: selectedOption.label
+                });
+            });
+
+            renderResult(drawnPlans, actualDrawCount, drawCount, validCombos.length);
+        }
+
+        function renderResult(plans, actualCount, requestedCount, availableCombosCount) {
+            updateDateDisplay();
+
+            if (plans.length === 0) {
+                planList.innerHTML = '<li class="empty-message">🤔 什么都没抽到，可能是今天的运气在排队～</li>';
+                return;
+            }
+
+            let html = '';
+            plans.forEach((plan, index) => {
+                html += `<li class="plan-item" style="border-left-color: ${getColorByIndex(index)};">${plan.comboName} · ${plan.planLabel}</li>`;
+            });
+
+            if (actualCount < requestedCount) {
+                html += `<li class="empty-message" style="margin-top: 0.5rem; font-size: 0.9rem;">😉 只抽到 ${actualCount} 件好事（最多 ${availableCombosCount} 件，贪心可不行～）</li>`;
+            }
+
+            planList.innerHTML = html;
+        }
+
+        function getColorByIndex(index) {
+            const colors = ['#f39c12', '#e74c3c', '#2ecc71', '#9b59b6', '#3498db', '#1abc9c'];
+            return colors[index % colors.length];
+        }
+
+        // ============================================================
+        // 6. 初始化与事件绑定
+        // ============================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            updateDateDisplay();
+            renderSettingsPanel();
+
+            drawBtn.addEventListener('click', drawPlans);
+            openSettingsBtn.addEventListener('click', openSettings);
+            closeSettingsBtn.addEventListener('click', closeSettings);
+
+            settingsModal.addEventListener('click', (e) => {
+                if (e.target === settingsModal) {
+                    closeSettings();
+                }
+            });
+
+            document.querySelector('.modal-panel').addEventListener('click', (e) => e.stopPropagation());
+
+            // 防止iOS输入框聚焦时页面缩放
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.addEventListener('focus', () => {
+                    if (window.innerWidth < 480) {
+                        document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+                    }
+                });
+                input.addEventListener('blur', () => {
+                    document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover');
+                });
+            });
+
+            setTimeout(() => {
+                drawPlans();
+            }, 150);
+        });
+
+        // 处理窗口大小变化时的重绘
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                // 无需特殊操作，CSS媒体查询自动处理
+            }, 100);
+        });
+    </script>
+</body>
+</html>
